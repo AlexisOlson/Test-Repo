@@ -156,8 +156,7 @@ def dualPair (s : Cell → Bool) : LogPair :=
 
 /-- Every one of the 512 cell subsets lies below the dual supporting
 hyperplane.  This is an exact integer cross-product check. -/
-set_option maxHeartbeats 0 in
-set_option maxRecDepth 100000 in
+set_option maxHeartbeats 0 maxRecDepth 100000 in
 theorem subset_product_certificate :
     ∀ m : Fin 512,
       (phiPair (restrict pCount (mask m.val))).num * (dualPair (mask m.val)).den ≤
@@ -177,8 +176,7 @@ def deterministicPair : LogPair :=
 
 /-- `10 log deterministicPair > 19 log stochasticPair`, reduced to a strict
 comparison of two natural numbers. -/
-set_option maxHeartbeats 0 in
-set_option maxRecDepth 100000 in
+set_option maxHeartbeats 0 maxRecDepth 100000 in
 theorem final_product_certificate :
     stochasticPair.num ^ 19 * deterministicPair.den ^ 10 <
       stochasticPair.den ^ 19 * deterministicPair.num ^ 10 := by
