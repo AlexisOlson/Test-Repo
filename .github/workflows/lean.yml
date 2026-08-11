@@ -16,6 +16,7 @@ jobs:
             ~/.elan
             .lake/packages
           key: stoch-to-det-lower-bound-v4.33.0-rc2-299c7526
+          save-always: true
       - name: Install Lean
         run: |
           if [ ! -x "$HOME/.elan/bin/lake" ]; then
