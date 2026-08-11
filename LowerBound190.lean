@@ -25,9 +25,9 @@ lemma abs_log_one_add_sub_logTaylorR_le (n : ℕ) {x : ℝ}
   rw [hlog, ← coe_logTaylorR] at h
   have h' :
       ‖((Real.log (1 + x) - logTaylorR (n + 1) x : ℝ) : ℂ)‖ ≤
-        x ^ (n + 1) * (1 - x)⁻¹ / (n + 1) := by
+        |x| ^ (n + 1) * (1 - |x|)⁻¹ / (n + 1) := by
     simpa using h
-  simpa [Real.norm_eq_abs] using h'
+  simpa [Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hx0] using h'
 
 example :
     |Real.log (3 / 2) - logTaylorR 31 (1 / 2)| ≤ (1 : ℝ) / 1000000000 := by
