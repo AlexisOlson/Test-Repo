@@ -24,10 +24,15 @@ lemma abs_log_one_add_sub_logTaylorR_le (n : ℕ) {x : ℝ}
     exact (Complex.ofReal_log (by linarith)).symm
   rw [hlog, ← coe_logTaylorR] at h
   have h' :
-      ‖((Real.log (1 + x) - logTaylorR (n + 1) x : ℝ) : ℂ)‖ ≤
+      ‖(Real.log (1 + x) : ℂ) - (logTaylorR (n + 1) x : ℂ)‖ ≤
         |x| ^ (n + 1) * (1 - |x|)⁻¹ / (n + 1) := by
     simpa using h
-  simpa [Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hx0] using h'
+  have hcoe :
+      ((Real.log (1 + x) - logTaylorR (n + 1) x : ℝ) : ℂ) =
+        (Real.log (1 + x) : ℂ) - (logTaylorR (n + 1) x : ℂ) := by
+    norm_num
+  rw [← hcoe, Complex.norm_real, Real.norm_eq_abs] at h'
+  simpa [abs_of_nonneg hx0] using h'
 
 example :
     |Real.log (3 / 2) - logTaylorR 31 (1 / 2)| ≤ (1 : ℝ) / 1000000000 := by
