@@ -101,16 +101,21 @@ def weightQ (z : Cell) : ℚ := weightVec (cellIndex z)
 def dualQ (s : Cell → Bool) : ℚ :=
   ∑ z, if s z = true then weightQ z else 0
 
-def Exceptional (s : Cell → Bool) : Prop :=
-  s = mask 0 ∨ s = mask 7 ∨ s = mask 56 ∨ s = mask 438 ∨
-  s = mask 79 ∨ s = mask 432 ∨ s = mask 199 ∨ s = mask 203 ∨
-  s = mask 292 ∨ s = mask 195
+def ExceptionalMask (m : Fin 512) : Prop :=
+  m.val = 0 ∨ m.val = 7 ∨ m.val = 56 ∨ m.val = 438 ∨
+  m.val = 79 ∨ m.val = 432 ∨ m.val = 199 ∨ m.val = 203 ∨
+  m.val = 292 ∨ m.val = 195
 
 /-- The exhaustive 512-subset part of the dual certificate. -/
 theorem subset_marginQ :
     ∀ m : Fin 512,
-      Exceptional (mask m.val) ∨
+      ExceptionalMask m ∨
         phiQ (restrict pCount (mask m.val)) + 1 / 2 ≤ dualQ (mask m.val) := by
+  letI : Decidable
+      (∀ m : Fin 512,
+        ExceptionalMask m ∨
+          phiQ (restrict pCount (mask m.val)) + 1 / 2 ≤ dualQ (mask m.val)) :=
+    Fintype.decidableForallFintype
   native_decide
 
 def stochasticQ : ℚ :=
