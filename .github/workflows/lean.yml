@@ -1,0 +1,51 @@
+name: Lean
+
+on:
+  push:
+    branches:
+      - agent/stoch-to-det-lower-bound-190
+
+concurrency:
+  group: lower-bound-lean-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore Lean cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            ~/.elan
+            .lake/packages
+            lake-manifest.json
+          key: stoch-to-det-lower-bound-v4.33.0-rc2-299c7526
+      - name: Restore project build
+        id: project-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: .lake/build
+          key: lower-bound-project-v1-${{ hashFiles('LowerBound190/Certificate.lean', 'LowerBound190/ExactCertificate.lean') }}
+          restore-keys: |
+            lower-bound-project-v1-
+      - name: Install Lean
+        run: |
+          if [ ! -x "$HOME/.elan/bin/lake" ]; then
+            curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+              | sh -s -- -y
+          fi
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Resolve dependencies
+        run: |
+          lake update
+          lake exe cache get
+      - name: Build proof
+        run: lake build
+      - name: Save project build
+        if: always() && steps.project-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: .lake/build
+          key: lower-bound-project-v1-${{ hashFiles('LowerBound190/Certificate.lean', 'LowerBound190/ExactCertificate.lean') }}
