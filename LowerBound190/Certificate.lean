@@ -108,8 +108,9 @@ def Exceptional (s : Cell → Bool) : Prop :=
 
 /-- The exhaustive 512-subset part of the dual certificate. -/
 theorem subset_marginQ :
-    ∀ s : Cell → Bool,
-      Exceptional s ∨ phiQ (restrict pCount s) + 1 / 2 ≤ dualQ s := by
+    ∀ m : Fin 512,
+      Exceptional (mask m.val) ∨
+        phiQ (restrict pCount (mask m.val)) + 1 / 2 ≤ dualQ (mask m.val) := by
   native_decide
 
 def stochasticQ : ℚ :=
