@@ -151,8 +151,8 @@ def dualRat (s : Cell → Bool) : LogRat :=
 /-- Every one of the 512 cell subsets lies below the dual supporting
 hyperplane.  This is an exact rational comparison. -/
 theorem subset_product_certificate :
-    ∀ m : Fin 512,
-      (phiRat (restrict pCount (mask m.val))).val ≤ (dualRat (mask m.val)).val := by
+    ∀ s : Cell → Bool,
+      (phiRat (restrict pCount s)).val ≤ (dualRat s).val := by
   native_decide
 
 /-- Exact rational whose logarithm is `20000 · log(2) · S_p(V)` for the
