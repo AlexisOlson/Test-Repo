@@ -28,8 +28,7 @@ lemma cast_pos (a : LogRat) : (0 : ℝ) < (a.val : ℝ) := by
 
 @[simp] lemma logValue_inv (a : LogRat) :
     logValue (inv a) = -logValue a := by
-  have ha : a.val ≠ 0 := ne_of_gt a.pos
-  simp [logValue, inv, ha, Real.log_inv]
+  simp [logValue, inv, Real.log_inv]
 
 @[simp] lemma logValue_pow (a : LogRat) (n : ℕ) :
     logValue (pow a n) = n * logValue a := by
@@ -137,6 +136,7 @@ lemma logValue_phiRat (c : Cell → ℕ) :
       rw [log_rowProdNat, log_colProdNat, log_selfPow, log_cellProdNat]
       simp only [phiR, entropyR]
       rw [sum_rowCounts, sum_colCounts]
+      rw [show (∑ i, c i) = totalCount c by rfl]
       ring
 
 lemma logValue_psiRat (c : Cell → ℕ) :
@@ -158,6 +158,7 @@ lemma logValue_psiRat (c : Cell → ℕ) :
       rw [log_rowProdNat, log_colProdNat, log_cellProdNat]
       simp only [psiR, entropyR]
       rw [sum_rowCounts, sum_colCounts]
+      rw [show (∑ i, c i) = totalCount c by rfl]
       ring
 
 noncomputable def weightR (z : Cell) : ℝ :=
@@ -201,6 +202,7 @@ lemma logValue_deterministicRat :
     LogRat.logValue deterministicRat =
       psiR pCount - ∑ z, weightR z := by
   simp [deterministicRat, logValue_psiRat, logValue_dualRat, weightR]
+  ring
 
 /-- The exact power comparison is the desired strict `1.9` logarithmic gap. -/
 theorem final_log_certificate :
