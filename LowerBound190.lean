@@ -1,6 +1,7 @@
 import stoch_to_det.Envelope
 import Mathlib.Analysis.SpecialFunctions.Complex.LogBounds
 import LowerBound190.Certificate
+import LowerBound190.LogApprox
 
 namespace stoch_to_det.LowerBound190
 
