@@ -10,13 +10,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/cache@v4
+      - name: Restore Lean cache
+        id: lean-cache
+        uses: actions/cache/restore@v4
         with:
           path: |
             ~/.elan
             .lake/packages
+            lake-manifest.json
           key: stoch-to-det-lower-bound-v4.33.0-rc2-299c7526
-          save-always: true
       - name: Install Lean
         run: |
           if [ ! -x "$HOME/.elan/bin/lake" ]; then
@@ -30,3 +32,12 @@ jobs:
           lake exe cache get
       - name: Build proof
         run: lake build
+      - name: Save Lean cache
+        if: always() && steps.lean-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            ~/.elan
+            .lake/packages
+            lake-manifest.json
+          key: stoch-to-det-lower-bound-v4.33.0-rc2-299c7526
