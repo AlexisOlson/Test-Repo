@@ -5,6 +5,10 @@ on:
     branches:
       - agent/stoch-to-det-lower-bound-190
 
+concurrency:
+  group: lower-bound-lean-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
