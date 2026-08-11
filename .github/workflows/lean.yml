@@ -22,6 +22,14 @@ jobs:
             .lake/packages
             lake-manifest.json
           key: stoch-to-det-lower-bound-v4.33.0-rc2-299c7526
+      - name: Restore project build
+        id: project-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: .lake/build
+          key: lower-bound-project-v1-${{ hashFiles('LowerBound190/Certificate.lean', 'LowerBound190/ExactCertificate.lean') }}
+          restore-keys: |
+            lower-bound-project-v1-
       - name: Install Lean
         run: |
           if [ ! -x "$HOME/.elan/bin/lake" ]; then
@@ -35,3 +43,9 @@ jobs:
           lake exe cache get
       - name: Build proof
         run: lake build
+      - name: Save project build
+        if: always() && steps.project-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: .lake/build
+          key: lower-bound-project-v1-${{ hashFiles('LowerBound190/Certificate.lean', 'LowerBound190/ExactCertificate.lean') }}
