@@ -111,8 +111,11 @@ theorem subset_marginQ :
     ∀ m : Fin 512,
       ExceptionalMask m ∨
         phiQ (restrict pCount (mask m.val)) + 1 / 2 ≤ dualQ (mask m.val) := by
-  intro m
-  fin_cases m <;> native_decide
+  letI : DecidablePred (fun m : Fin 512 =>
+      ExceptionalMask m ∨
+        phiQ (restrict pCount (mask m.val)) + 1 / 2 ≤ dualQ (mask m.val)) :=
+    fun _ => inferInstance
+  native_decide
 
 def stochasticQ : ℚ :=
   psiQ pCount - phiQ q0Count - phiQ q1Count
