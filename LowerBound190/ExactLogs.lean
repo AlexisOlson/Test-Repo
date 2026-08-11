@@ -1,7 +1,7 @@
 import LowerBound190.ExactCertificate
 import stoch_to_det.Envelope
 
-namespace stoch_to_det.LowerBound190.ExactLogs
+namespace stoch_to_det.LowerBound190
 
 open Finset
 open scoped BigOperators
@@ -10,7 +10,7 @@ open Certificate ExactCertificate
 set_option maxHeartbeats 0
 set_option maxRecDepth 100000
 
-namespace LogRat
+namespace ExactCertificate.LogRat
 
 /-- The real logarithm represented by a positive exact rational. -/
 noncomputable def logValue (a : LogRat) : ℝ :=
@@ -22,16 +22,16 @@ lemma cast_pos (a : LogRat) : (0 : ℝ) < (a.val : ℝ) := by
 @[simp] lemma logValue_one : logValue one = 0 := by
   simp [logValue, one]
 
-lemma logValue_mul (a b : LogRat) :
+@[simp] lemma logValue_mul (a b : LogRat) :
     logValue (mul a b) = logValue a + logValue b := by
   simp [logValue, mul, Real.log_mul, (cast_pos a).ne', (cast_pos b).ne']
 
-lemma logValue_inv (a : LogRat) :
+@[simp] lemma logValue_inv (a : LogRat) :
     logValue (inv a) = -logValue a := by
   have ha : a.val ≠ 0 := ne_of_gt a.pos
   simp [logValue, inv, ha, Real.log_inv]
 
-lemma logValue_pow (a : LogRat) (n : ℕ) :
+@[simp] lemma logValue_pow (a : LogRat) (n : ℕ) :
     logValue (pow a n) = n * logValue a := by
   simp [logValue, pow, Real.log_pow]
 
@@ -46,7 +46,9 @@ lemma logValue_prod {α : Type} [Fintype α] (f : α → LogRat) :
   intro i _
   exact (cast_pos (f i)).ne'
 
-end LogRat
+end ExactCertificate.LogRat
+
+namespace ExactLogs
 
 /-- `n log n`, with Lean's harmless convention `log 0 = 0`. -/
 noncomputable def ellR (n : ℕ) : ℝ :=
@@ -60,6 +62,16 @@ noncomputable def phiR (c : Cell → ℕ) : ℝ :=
 
 noncomputable def psiR (c : Cell → ℕ) : ℝ :=
   2 * entropyR c - entropyR (rowCounts c) - entropyR (colCounts c)
+
+lemma sum_rowCounts (c : Cell → ℕ) :
+    ∑ x, rowCounts c x = totalCount c := by
+  simp only [rowCounts, totalCount]
+  rw [Fintype.sum_prod_type]
+
+lemma sum_colCounts (c : Cell → ℕ) :
+    ∑ y, colCounts c y = totalCount c := by
+  simp only [colCounts, totalCount]
+  rw [Fintype.sum_prod_type, Finset.sum_comm]
 
 lemma log_selfPow (n : ℕ) :
     Real.log (selfPow n : ℝ) = ellR n := by
@@ -123,7 +135,8 @@ lemma logValue_phiRat (c : Cell → ℕ) :
       ring
     _ = phiR c := by
       rw [log_rowProdNat, log_colProdNat, log_selfPow, log_cellProdNat]
-      simp [phiR, entropyR, totalCount]
+      simp only [phiR, entropyR]
+      rw [sum_rowCounts, sum_colCounts]
       ring
 
 lemma logValue_psiRat (c : Cell → ℕ) :
@@ -141,10 +154,10 @@ lemma logValue_psiRat (c : Cell → ℕ) :
         2 * Real.log (cellProdNat c : ℝ) := by
       simp [LogRat.logValue, psiRat, Real.log_div, Real.log_mul,
         Real.log_pow, hr, hc, hz]
-      ring
     _ = psiR c := by
       rw [log_rowProdNat, log_colProdNat, log_cellProdNat]
-      simp [psiR, entropyR, totalCount]
+      simp only [psiR, entropyR]
+      rw [sum_rowCounts, sum_colCounts]
       ring
 
 noncomputable def weightR (z : Cell) : ℝ :=
@@ -161,17 +174,10 @@ lemma logValue_dualRat (s : Cell → Bool) :
   · have hz' : s z = false := Bool.eq_false_of_not_eq_true hz
     simp [hz', LogRat.logValue_one]
 
-/-- The same exhaustive certificate, indexed directly by the finite Boolean
-subset rather than by its nine-bit encoding. -/
-theorem subset_product_certificate_fun :
-    ∀ s : Cell → Bool,
-      (phiRat (restrict pCount s)).val ≤ (dualRat s).val := by
-  native_decide
-
 lemma subset_log_certificate (s : Cell → Bool) :
     phiR (restrict pCount s) ≤
       ∑ z, if s z = true then weightR z else 0 := by
-  have hq := subset_product_certificate_fun s
+  have hq := subset_product_certificate s
   have hreal :
       ((phiRat (restrict pCount s)).val : ℝ) ≤
         ((dualRat s).val : ℝ) := by
@@ -188,15 +194,13 @@ lemma subset_log_certificate (s : Cell → Bool) :
 lemma logValue_stochasticRat :
     LogRat.logValue stochasticRat =
       psiR pCount - phiR q0Count - phiR q1Count := by
-  simp [stochasticRat, LogRat.logValue_mul, LogRat.logValue_inv,
-    logValue_phiRat, logValue_psiRat]
+  simp [stochasticRat, logValue_phiRat, logValue_psiRat]
   ring
 
 lemma logValue_deterministicRat :
     LogRat.logValue deterministicRat =
       psiR pCount - ∑ z, weightR z := by
-  simp [deterministicRat, LogRat.logValue_mul, LogRat.logValue_inv,
-    logValue_psiRat, logValue_dualRat, weightR]
+  simp [deterministicRat, logValue_psiRat, logValue_dualRat, weightR]
 
 /-- The exact power comparison is the desired strict `1.9` logarithmic gap. -/
 theorem final_log_certificate :
@@ -214,4 +218,5 @@ theorem final_log_certificate :
     simpa [LogRat.logValue, Real.log_pow] using hlog
   linarith
 
-end stoch_to_det.LowerBound190.ExactLogs
+end ExactLogs
+end stoch_to_det.LowerBound190
