@@ -6,6 +6,9 @@ open Finset
 open scoped BigOperators
 open Certificate
 
+set_option maxHeartbeats 0
+set_option maxRecDepth 100000
+
 /-- A positive rational number whose real logarithm represents one exact
 entropy expression.  Rational arithmetic cancels common factors eagerly. -/
 structure LogRat where
@@ -147,7 +150,6 @@ def dualRat (s : Cell → Bool) : LogRat :=
 
 /-- Every one of the 512 cell subsets lies below the dual supporting
 hyperplane.  This is an exact rational comparison. -/
-set_option maxHeartbeats 0 maxRecDepth 100000 in
 theorem subset_product_certificate :
     ∀ m : Fin 512,
       (phiRat (restrict pCount (mask m.val))).val ≤ (dualRat (mask m.val)).val := by
@@ -167,7 +169,6 @@ def deterministicRat : LogRat :=
 
 /-- `10 log deterministicRat > 19 log stochasticRat`, reduced to one strict
 comparison of exact rationals. -/
-set_option maxHeartbeats 0 maxRecDepth 100000 in
 theorem final_product_certificate :
     stochasticRat.val ^ 19 < deterministicRat.val ^ 10 := by
   native_decide
