@@ -106,15 +106,15 @@ def ExceptionalMask (m : Fin 512) : Prop :=
   m.val = 79 ∨ m.val = 432 ∨ m.val = 199 ∨ m.val = 203 ∨
   m.val = 292 ∨ m.val = 195
 
+instance instDecidableExceptionalMask (m : Fin 512) : Decidable (ExceptionalMask m) := by
+  unfold ExceptionalMask
+  infer_instance
+
 /-- The exhaustive 512-subset part of the dual certificate. -/
 theorem subset_marginQ :
     ∀ m : Fin 512,
       ExceptionalMask m ∨
         phiQ (restrict pCount (mask m.val)) + 1 / 2 ≤ dualQ (mask m.val) := by
-  letI : DecidablePred (fun m : Fin 512 =>
-      ExceptionalMask m ∨
-        phiQ (restrict pCount (mask m.val)) + 1 / 2 ≤ dualQ (mask m.val)) :=
-    fun _ => inferInstance
   native_decide
 
 def stochasticQ : ℚ :=
